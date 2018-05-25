@@ -25,7 +25,7 @@ class GerritJSONEncoder(JSONEncoder):
     def default(self, obj):
         try:
             if isinstance(obj, GerritUser):
-                return {'id': obj.id, 'name': obj.name, 'username': obj.username, 'avatars': obj.avatars}
+                return {'id': obj.id, 'name': obj.name, 'username': obj.username}
         except TypeError:
             pass
         return JSONEncoder.default(self, obj)
@@ -33,7 +33,7 @@ class GerritJSONEncoder(JSONEncoder):
 def parse_gerrit_datetime(d):
     if d is None:
         return None
-    return datetime.strptime(d, "%Y-%m-%d %H:%M:%S.000000000")
+    return datetime.strptime(d, "%Y-%m-%d %H:%M:%S.%f000")
 
 def datetime_to_gerrit(d):
     return d.strftime('"%Y-%m-%d %H:%M:%S"')
@@ -47,8 +47,8 @@ class GerritThing(object):
         text = r.text[5:]
         try:
             return json.loads(text)
-        except Exception:
-            print(text)
+        except Exception as e:
+            print(e)
             return {}
 
 class GerritUser(GerritThing):
@@ -68,9 +68,6 @@ class GerritUser(GerritThing):
             self.email = obj['email']
         except KeyError:
             self.email = 'unknown'
-        self.avatars = {}
-        for i in obj['avatars']:
-            self.avatars[i['height']] = i['url']
 
 class GerritChange(GerritThing):
     """Represents a single change."""
@@ -88,16 +85,6 @@ class GerritChange(GerritThing):
         self.number = obj['_number']
         self.url = self._url + '/' + str(self.number)
         self.owner = GerritUser(url, obj['owner'])
-        self.labels = {}
-        for lbl in obj['labels']:
-            self.labels[lbl] = {}
-            for k, v in obj['labels'][lbl].items():
-                if k in ('blocking', 'value', 'default_value'):
-                    self.labels[lbl][k] = v
-                elif k in ('approved', 'rejected', 'recommended', 'disliked'):
-                    self.labels[lbl][k] = GerritUser(url, v)
-                else:
-                    print("Unknown label: %s" % k)
 
     def __str__(self):
         return 'GerritChange[status={},url={},project={},branch={},change_id={}]'.format(self.status, self._url, self.project,
@@ -153,9 +140,5 @@ class GerritServer(GerritThing):
 
     def changes(self, query='status:merged', n=50, limit=-1):
         # O is a bitmask in hex - see https://github.com/gerrit-review/gerrit/blob/master/gerrit-extension-api/src/main/java/com/google/gerrit/extensions/client/ListChangesOption.java
-        params = { 'q': query, 'n': n, 'O': '81' }
+        params = { 'q': query, 'n': n }
         return GerritListing(self._url, '/changes/', params, GerritChange, limit)
-
-
-
-

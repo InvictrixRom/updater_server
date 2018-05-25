@@ -1,15 +1,17 @@
 nav {
-    background-color: #167C80 !important;
+    background-color: #111111 !important;
 }
 
 .page-footer {
-    background-color: #167c80 !important;
+    background-color: #111111 !important;
 }
 
 .top-logo {
     height: 64px;
 }
+
 body {
+    background-color: #000000 !important;
     display: flex;
     min-height: 100vh;
     flex-direction: column;
@@ -18,6 +20,7 @@ body {
 main {
     flex: 1 0 auto;
 }
+
 header, main, footer {
     padding-left: 300px;
 }
@@ -40,8 +43,17 @@ header, main, footer {
 }
 
 .side-nav {
+    background-color: #111111 !important;
     height: calc(100%);
     height: -webkit-calc(100% + 60px);
+}
+
+.side-nav li ul li a {
+    color: #fff !important;
+}
+
+.side-nav li ul li div ul li a {
+    background-color: #111 !important;
 }
 
 .side-nav a {

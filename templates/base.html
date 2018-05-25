@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>LineageOS Downloads</title>
+        <title>Invictrix Downloads</title>
         <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
         <link rel="stylesheet" href="/static/site.css">
@@ -9,14 +9,11 @@
         <link rel="icon" sizes="16x16 32x32" href="/static/favicons/favicon.ico">
         <!--[if IE]><link rel="shortcut icon" href="/static/favicons/favicon.ico"><![endif]-->
         <link rel="apple-touch-icon-precomposed" href="/static/favicons/favicon-152.png">
-        <meta name="theme-color" content="#167C80">
-        <meta name="msapplication-TileColor" content="#167C80">
-        <meta name="msapplication-TileImage" content="/static/favicons/favicon-144.png">
     </head>
     <body>
         <nav>
             <div class="nav-wrapper">
-                <a href="#!" class="brand-logo center">LineageOS Downloads</a>
+                <a href="#!" class="brand-logo center">Invictrix Downloads</a>
                 <ul id="slide-out" class="side-nav fixed">
                     <li>
                         <div class="userView">
@@ -65,11 +62,6 @@
                     <li class="no-padding">
                         <ul class="collapsible collapsible-accordian">
                             <li class="bold">
-                                {% if extras %}
-                                <a class="collapsible-header waves-effect waves-teal bold active" href="/extras">Extras</a>
-                                {% else %}
-                                <a class="collapsible-header waves-effect waves-teal bold" href="/extras">Extras</a>
-                                {% endif %}
                             </li>
                         </ul>
                     </li>
@@ -93,8 +85,8 @@
           </div>
           <div class="footer-copyright">
             <div class="container">
-                © 2017-{{ year }} LineageOS. Licensed under Apache 2.0.
-            <a class="grey-text text-lighten-4 right" href="https://github.com/lineageos-infra/updater">Source</a>
+                © {{ year }} Jacob McSwain. Licensed under Apache 2.0.
+            <a class="grey-text text-lighten-4 right" href="https://github.com/InvictrixROM/updater_server">Source</a>
             </div>
           </div>
         </footer>

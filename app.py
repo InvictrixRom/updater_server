@@ -1,9 +1,14 @@
+
 #!/usr/bin/env python3
 #pylint: disable=line-too-long,missing-docstring,invalid-name
 from __future__ import absolute_import
 
 import json
 import os
+import zipfile
+import re
+import hashlib
+
 from time import time, strftime
 
 import arrow
@@ -24,6 +29,20 @@ app.json_encoder = GerritJSONEncoder
 
 cache = Cache(app)
 gerrit = GerritServer(app.config['GERRIT_URL'])
+
+def sha256_checksum(filename, block_size=257152):
+    sha256 = hashlib.sha256()
+    with open(filename, 'rb') as f:
+        for block in iter(lambda: f.read(block_size), b''):
+            sha256.update(block)
+    return sha256.hexdigest()
+
+def sha1_checksum(filename, block_size=257152):
+    sha1 = hashlib.sha1()
+    with open(filename, 'rb') as f:
+        for block in iter(lambda: f.read(block_size), b''):
+            sha1.update(block)
+    return sha1.hexdigest()
 
 ##########################
 # Metrics!
@@ -69,14 +88,54 @@ def handle_upstream_exception(error):
 
 @cache.memoize()
 def get_builds():
-    try:
-        req = requests.get(app.config['UPSTREAM_URL'])
-        if req.status_code != 200:
-            raise UpstreamApiException('Unable to contact upstream API')
-        return json.loads(req.text)
-    except Exception as e:
-        print(e)
-        raise UpstreamApiException('Unable to contact upstream API')
+    # contains delta and full which contain device name then zip files
+    buildinfo = {}
+    devices = {}
+    devicebuilds = []
+
+    path = "/var/www/html/builds/full/"
+    for device in os.listdir(path):
+        for filepath in os.listdir('{}{}'.format(path, device)):
+            try:
+                with zipfile.ZipFile('{}{}/{}'.format(path, device, filepath), 'r') as update_zip:
+                    build_prop = update_zip.read('system/build.prop').decode('utf-8')
+                    timestamp = int(re.findall('ro.build.date.utc=([0-9]+)', build_prop)[0])
+            except:
+                timestamp = -1
+
+            buildinfo['sha256'] = sha256_checksum('{}{}/{}'.format(path, device, filepath))
+            buildinfo['sha1'] = sha1_checksum('{}{}/{}'.format(path, device, filepath))
+            buildinfo['size'] = os.path.getsize('{}{}/{}'.format(path, device, filepath))
+            buildinfo['date'] = '2018-05-23'
+            buildinfo['datetime'] = timestamp
+            buildinfo['filename'] = filepath
+            buildinfo['filepath'] = 'builds/full/{}/{}'.format(device, filepath)
+            buildinfo['version'] = '14.1'
+            buildinfo['type'] = 'Official'
+            buildinfo['incremental'] = False
+            devicebuilds.append(buildinfo)
+
+        devices[device] = devicebuilds
+
+    path = "/var/www/html/builds/incremental/"
+    for device in os.listdir(path):
+        for filepath in os.listdir(path):
+            timestamp = -1
+            buildinfo['sha256'] = sha256_checksum('{}{}/{}'.format(path, device, filepath))
+            buildinfo['sha1'] = sha1_checksum('{}{}/{}'.format(path, device, filepath))
+            buildinfo['size'] = os.path.getsize('{}{}/{}'.format(path, device, filepath))
+            buildinfo['date'] = '2018-05-23'
+            buildinfo['datetime'] = timestamp
+            buildinfo['filename'] = filepath
+            buildinfo['filepath'] = 'builds/full/{}/{}'.format(device, filepath)
+            buildinfo['version'] = '14.1'
+            buildinfo['type'] = 'Official'
+            buildinfo['incremental'] = False
+            devicebuilds.append(buildinfo)
+
+        devices[device] = devicebuilds
+
+    return devices
 
 def get_device_list():
     return get_builds().keys()
@@ -126,6 +185,7 @@ def get_build_types(device, romtype, after, version):
             "version": rom['version'],
             "filename": rom['filename'],
             "size": rom['size'],
+            "incremental": rom['incremental'],
         })
     return jsonify({'response': data})
 
@@ -139,9 +199,9 @@ def get_device_version(device):
 # API
 ##########################
 
-@app.route('/api/v1/<string:device>/<string:romtype>/<string:incrementalversion>')
+@app.route('/api/v1/<string:device>/<string:romtype>/')
 #cached via memoize on get_build_types
-def index(device, romtype, incrementalversion):
+def index(device, romtype):
     #pylint: disable=unused-argument
     after = request.args.get("after")
     version = request.args.get("version")
@@ -152,7 +212,7 @@ def index(device, romtype, incrementalversion):
 @cache.cached()
 def get_types(device):
     data = get_device(device)
-    types = set(['nightly'])
+    types = set(['official','weekly'])
     for build in data:
         types.add(build['type'])
     return jsonify({'response': list(types)})
@@ -206,9 +266,9 @@ def web_device(device):
 def favicon():
     return ''
 
-@app.route("/extras")
-@cache.cached()
-def web_extras():
-    oem_to_devices, device_to_oem = get_oem_device_mapping()
-
-    return render_template("extras.html", oem_to_devices=oem_to_devices, device_to_oem=device_to_oem, extras=True)
+#@app.route("/extras")
+#@cache.cached()
+#def web_extras():
+#    oem_to_devices, device_to_oem = get_oem_device_mapping()
+#
+#    return render_template("extras.html", oem_to_devices=oem_to_devices, device_to_oem=device_to_oem, extras=True)

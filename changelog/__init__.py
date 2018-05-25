@@ -27,9 +27,7 @@ with open('device_deps.json') as f:
 is_qcom = {}
 
 def is_related_change(gerrit, device, curbranch, project, branch):
-    if not ('/android_' in project or '-kernel-' in project):
-        return False
-
+    return True
     # branch = "cm-14.1-caf-msm8996" or "cm-14.1" or "stable/cm-13.0-ZNH5Y"
     if curbranch and (curbranch not in branch or "/" in branch):
         return False
@@ -80,7 +78,7 @@ def get_timestamp(ts):
         return None
     return int((ts - datetime(1970, 1, 1)).total_seconds())
 
-def get_changes(gerrit, device=None, before=-1, version='14.1', status_url='#'):
+def get_changes(gerrit, device=None, before=-1, version='8.1', status_url='#'):
     last_release = -1
 
     query = 'status:merged'
@@ -95,6 +93,7 @@ def get_changes(gerrit, device=None, before=-1, version='14.1', status_url='#'):
     last = 0
     try:
         for c in changes:
+            print(c)
             last = get_timestamp(c.updated)
             if is_related_change(gerrit, device, version, c.project, c.branch):
                 nightly_changes.append({
@@ -103,8 +102,7 @@ def get_changes(gerrit, device=None, before=-1, version='14.1', status_url='#'):
                     'submitted': get_timestamp(c.submitted),
                     'updated': get_timestamp(c.updated),
                     'url': c.url,
-                    'owner': c.owner,
-                    'labels': c.labels
+                    'owner': c.owner
                 })
     except ConnectionError as e:
         nightly_changes.append({
@@ -113,7 +111,6 @@ def get_changes(gerrit, device=None, before=-1, version='14.1', status_url='#'):
             'submitted': 0,
             'updated': 0,
             'url': status_url,
-            'owner': None,
-            'labels': None
+            'owner': None
             })
     return {'last': last, 'res': nightly_changes }

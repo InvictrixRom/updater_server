@@ -88,7 +88,7 @@ function renderChanges(data, textStatus, xhr) {
         let args = {
             'url': res[el].url,
             'subject': res[el].subject,
-            'project': res[el].project.split('/')[1],
+            'project': res[el].project,
         };
         document.getElementById("changes").innerHTML += String.format(FORMAT, args);
     }
