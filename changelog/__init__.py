@@ -93,7 +93,6 @@ def get_changes(gerrit, device=None, before=-1, version='8.1', status_url='#'):
     last = 0
     try:
         for c in changes:
-            print(c)
             last = get_timestamp(c.updated)
             if is_related_change(gerrit, device, version, c.project, c.branch):
                 nightly_changes.append({
