@@ -43,7 +43,7 @@ class GerritThing(object):
         self._url = url
 
     def _do_request(self, path, params):
-        r = requests.get(self._url + path, params=params)
+        r = requests.get(self._url + path, params=params, timeout=5)
         text = r.text[5:]
         try:
             return json.loads(text)
@@ -142,3 +142,4 @@ class GerritServer(GerritThing):
         # O is a bitmask in hex - see https://github.com/gerrit-review/gerrit/blob/master/gerrit-extension-api/src/main/java/com/google/gerrit/extensions/client/ListChangesOption.java
         params = { 'q': query, 'n': n }
         return GerritListing(self._url, '/changes/', params, GerritChange, limit)
+

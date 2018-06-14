@@ -20,58 +20,25 @@ from requests.exceptions import ConnectionError
 from datetime import datetime, timedelta
 
 import json
+import requests
+import re
 
-# device_deps.json is generated using https://github.com/LineageOS/scripts/tree/master/device-deps-regenerator
 with open('device_deps.json') as f:
     dependencies = json.load(f)
-is_qcom = {}
 
 def is_related_change(gerrit, device, curbranch, project, branch):
-    return True
-    # branch = "cm-14.1-caf-msm8996" or "cm-14.1" or "stable/cm-13.0-ZNH5Y"
-    if curbranch and (curbranch not in branch or "/" in branch):
-        return False
+
+    if device == "all":
+        return True
 
     if device not in dependencies:
         return True
 
     deps = dependencies[device]
-    if project.split('/', 1)[1] in deps:
-        # device explicitly depends on it
-        return True
+    for dep in deps:
+        return dep == project
 
-    if '_kernel_' in project or '_device_' in project or 'samsung' in project or 'nvidia' in project \
-            or '_omap' in project or 'FlipFlap' in project or 'lge-kernel-mako' in project:
-        return False
-
-    if not ('hardware_qcom_' in project or project.endswith('-caf')):
-        # not a qcom-specific HAL
-        return True
-
-    # probably a qcom-only HAL
-    qcom = True
-    if device in is_qcom:
-        qcom = is_qcom[device]
-    else:
-        for dep in deps:
-            # Exynos devices either depend on hardware/samsung_slsi* or kernel/samsung/smdk4412
-            if 'samsung_slsi' in dep or 'smdk4412' in dep:
-                qcom = False
-                break
-            # Tegras use hardware/nvidia/power
-            elif '_nvidia_' in dep:
-                qcom = False
-                break
-            # Omaps use hardware/ti/omap*
-            elif '_omap' in dep:
-                qcom = False
-            # Mediateks use device/cyanogen/mt6xxx-common or kernel/mediatek/*
-            elif '_mt6' in dep or '_mediatek_' in dep:
-                qcom = False
-
-        is_qcom[device] = qcom
-
-    return qcom
+    return False
 
 def get_timestamp(ts):
     if not ts:
@@ -104,6 +71,7 @@ def get_changes(gerrit, device=None, before=-1, version='8.1', status_url='#'):
                     'owner': c.owner
                 })
     except ConnectionError as e:
+        print(e)
         nightly_changes.append({
             'project': None,
             'subject': None,

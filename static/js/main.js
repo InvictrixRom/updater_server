@@ -101,33 +101,15 @@ function loadMore() {
     $.getJSON('/api/v1/changes/' + device + '/' + lastChangeTime + '/', null, function(data, textStatus, xhr) {
         $('#changes .loading').remove();
         renderChanges(data, textStatus, xhr);
-        onScroll(); // if we don't have >1 window of changes, load more
     });
 }
+
 builds = [];
 loading = false;
 $(document).ready(function() {
     loading = true;
 
-    $.getJSON('/api/v1/' + device + '/nightly/changelog', null, function(data, textStatus, xhr) {
-        builds = data.response;
-        currentBuildIndex = builds.length - 1;
-        while (currentBuildIndex >= 0 && currentBuildIndex < builds.length && Date.now() < builds[currentBuildIndex].datetime) {
-            console.log('disregarding ' + builds[currentBuildIndex].datetime + ', ' + builds[currentBuildIndex].filename);
-            currentBuildIndex--;
-        }
-
-        if (device != 'all' && lastChangeTime == -1) {
-            document.getElementById("changes").innerHTML += '<li class="collection-header"><strong>Changes to be included in next build</strong></li>';
-        }
-
-        loadMore();
-    });
-
-    /* all is not actually a device, so the builds endpoint will 404 */
-    if (device == 'all') {
-        loadMore();
-    }
+    loadMore();
 
 });
 

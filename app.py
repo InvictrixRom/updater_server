@@ -21,8 +21,6 @@ from flask import Flask, jsonify, request, render_template, Response
 from flask_caching import Cache
 from prometheus_client import multiprocess, generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST, Counter, Histogram
 
-
-
 app = Flask(__name__)
 app.config.from_object("config.Config")
 app.json_encoder = GerritJSONEncoder
@@ -89,7 +87,6 @@ def handle_upstream_exception(error):
 @cache.memoize()
 def get_builds():
     # contains delta and full which contain device name then zip files
-    buildinfo = {}
     devices = {}
     devicebuilds = []
 
@@ -103,6 +100,7 @@ def get_builds():
             except:
                 timestamp = -1
 
+            buildinfo = {}
             buildinfo['sha256'] = sha256_checksum('{}{}/{}'.format(path, device, filepath))
             buildinfo['sha1'] = sha1_checksum('{}{}/{}'.format(path, device, filepath))
             buildinfo['size'] = os.path.getsize('{}{}/{}'.format(path, device, filepath))
@@ -110,17 +108,19 @@ def get_builds():
             buildinfo['datetime'] = timestamp
             buildinfo['filename'] = filepath
             buildinfo['filepath'] = 'builds/full/{}/{}'.format(device, filepath)
-            buildinfo['version'] = '14.1'
+            buildinfo['version'] = None
             buildinfo['type'] = 'Official'
             buildinfo['incremental'] = False
             devicebuilds.append(buildinfo)
 
         devices[device] = devicebuilds
+        devicebuilds = []
 
     path = "/var/www/html/builds/incremental/"
     for device in os.listdir(path):
         for filepath in os.listdir(path):
             timestamp = -1
+            buildinfo = {}
             buildinfo['sha256'] = sha256_checksum('{}{}/{}'.format(path, device, filepath))
             buildinfo['sha1'] = sha1_checksum('{}{}/{}'.format(path, device, filepath))
             buildinfo['size'] = os.path.getsize('{}{}/{}'.format(path, device, filepath))
@@ -128,12 +128,13 @@ def get_builds():
             buildinfo['datetime'] = timestamp
             buildinfo['filename'] = filepath
             buildinfo['filepath'] = 'builds/full/{}/{}'.format(device, filepath)
-            buildinfo['version'] = '14.1'
+            buildinfo['version'] = None
             buildinfo['type'] = 'Official'
             buildinfo['incremental'] = False
             devicebuilds.append(buildinfo)
 
         devices[device] = devicebuilds
+        devicebuilds = []
 
     return devices
 
