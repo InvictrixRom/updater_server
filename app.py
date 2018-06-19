@@ -9,6 +9,7 @@ import zipfile
 import re
 import hashlib
 
+import datetime
 from time import time, strftime
 
 import arrow
@@ -86,57 +87,9 @@ def handle_upstream_exception(error):
 
 @cache.memoize()
 def get_builds():
-    # contains delta and full which contain device name then zip files
-    devices = {}
-    devicebuilds = []
-
-    path = "/var/www/html/builds/full/"
-    for device in os.listdir(path):
-        for filepath in os.listdir('{}{}'.format(path, device)):
-            try:
-                with zipfile.ZipFile('{}{}/{}'.format(path, device, filepath), 'r') as update_zip:
-                    build_prop = update_zip.read('system/build.prop').decode('utf-8')
-                    timestamp = int(re.findall('ro.build.date.utc=([0-9]+)', build_prop)[0])
-            except:
-                timestamp = -1
-
-            buildinfo = {}
-            buildinfo['sha256'] = sha256_checksum('{}{}/{}'.format(path, device, filepath))
-            buildinfo['sha1'] = sha1_checksum('{}{}/{}'.format(path, device, filepath))
-            buildinfo['size'] = os.path.getsize('{}{}/{}'.format(path, device, filepath))
-            buildinfo['date'] = '2018-05-23'
-            buildinfo['datetime'] = timestamp
-            buildinfo['filename'] = filepath
-            buildinfo['filepath'] = 'builds/full/{}/{}'.format(device, filepath)
-            buildinfo['version'] = None
-            buildinfo['type'] = 'Official'
-            buildinfo['incremental'] = False
-            devicebuilds.append(buildinfo)
-
-        devices[device] = devicebuilds
-        devicebuilds = []
-
-    path = "/var/www/html/builds/incremental/"
-    for device in os.listdir(path):
-        for filepath in os.listdir(path):
-            timestamp = -1
-            buildinfo = {}
-            buildinfo['sha256'] = sha256_checksum('{}{}/{}'.format(path, device, filepath))
-            buildinfo['sha1'] = sha1_checksum('{}{}/{}'.format(path, device, filepath))
-            buildinfo['size'] = os.path.getsize('{}{}/{}'.format(path, device, filepath))
-            buildinfo['date'] = '2018-05-23'
-            buildinfo['datetime'] = timestamp
-            buildinfo['filename'] = filepath
-            buildinfo['filepath'] = 'builds/full/{}/{}'.format(device, filepath)
-            buildinfo['version'] = None
-            buildinfo['type'] = 'Official'
-            buildinfo['incremental'] = False
-            devicebuilds.append(buildinfo)
-
-        devices[device] = devicebuilds
-        devicebuilds = []
-
-    return devices
+    with open('/root/builds.json') as json_data:
+        builds = json.load(json_data)
+    return builds
 
 def get_device_list():
     return get_builds().keys()

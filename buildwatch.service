@@ -1,0 +1,14 @@
+[Unit]
+Description=buildwatch, an inotify based module to detect and create json for incoming builds
+Documentation=https://github.com/InvictrixROM/updater_server
+After=network.target
+
+[Service] 
+Type=simple
+User=root
+WorkingDirectory=/root/updater_server/buildwatch
+ExecStart=/usr/bin/python /root/updater_server/buildwatch/main.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
