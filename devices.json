@@ -1,0 +1,12 @@
+[
+    { "model": "angler", "oem": "Google", "name": "Nexus 6P"},
+    { "model": "berkeley", "oem": "Huawei", "name": "Honor View 10", "has_recovery": false},
+    { "model": "bullhead", "oem": "Google", "name": "Nexus 5X"},
+    { "model": "marlin", "oem": "Google", "name": "Pixel XL"},
+    { "model": "mata", "oem": "Essential", "name": "PH-1" },
+    { "model": "nash", "oem": "Motorola", "name": "Z2 Force"},
+    { "model": "oneplus3", "oem": "OnePlus", "name": "3 / 3T"},
+    { "model": "potter", "oem": "Motorola", "name": "G5 Plus"},
+    { "model": "sailfish", "oem": "Google", "name": "Pixel"}
+    { "model": "vince", "oem": "Xiaomi", "name": "Redmi 5 Plus"}
+]

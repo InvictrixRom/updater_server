@@ -1,0 +1,40 @@
+{
+    "berkeley": [
+        "device_huawei_berkeley"
+    ],
+    "mata": [
+        "device_essential_mata",
+        "kernel_essential_msm8998"
+    ],
+    "angler": [
+        "device_huawei_angler",
+        "kernel_huawei_angler"
+    ],
+    "sailfish": [
+        "device_google_sailfish",
+        "kernel_google_sailfish"
+    ],
+    "marlin": [
+        "device_google_marlin",
+        "kernel_google_marlin"
+    ],
+    "nash": [
+        "device_motorola_nash",
+        "kernel_motorola_nash"
+    ],
+    "bullhead": [
+        "device_lge_bullhead",
+        "kernel_lge_bullhead"
+    ],
+    "oneplus3": [
+        "device_oneplus_oneplus3",
+        "kernel_oneplus_oneplus3"
+    ],
+    "potter": [
+        "device_motorola_potter"
+    ],
+    "vince": [
+        "device_xiaomi_vince",
+        "kernel_xiaomi_vince"
+    ]
+}
