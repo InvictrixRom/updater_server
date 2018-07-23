@@ -20,7 +20,6 @@ from config import Config
 from custom_exceptions import DeviceNotFoundException, UpstreamApiException
 from flask import Flask, jsonify, request, render_template, Response
 from flask_caching import Cache
-from prometheus_client import multiprocess, generate_latest, CollectorRegistry, CONTENT_TYPE_LATEST, Counter, Histogram
 
 app = Flask(__name__)
 app.config.from_object("config.Config")
@@ -42,29 +41,6 @@ def sha1_checksum(filename, block_size=257152):
         for block in iter(lambda: f.read(block_size), b''):
             sha1.update(block)
     return sha1.hexdigest()
-
-##########################
-# Metrics!
-##########################
-REQUEST_LATENCY = Histogram("flask_request_latency_seconds", "Request Latency", ['method', 'endpoint'])
-REQUEST_COUNT = Counter("flask_request_count", "Request Count", ["method", "endpoint", "status"])
-
-@app.before_request
-def start_timer():
-    request.stats_start = time()
-
-@app.after_request
-def stop_timer(response):
-    delta = time() - request.stats_start
-    REQUEST_LATENCY.labels(request.method, request.endpoint).observe(delta) #pylint: disable=no-member
-    REQUEST_COUNT.labels(request.method, request.endpoint, response.status_code).inc() #pylint: disable=no-member
-    return response
-
-@app.route('/metrics')
-def metrics():
-    registry = CollectorRegistry()
-    multiprocess.MultiProcessCollector(registry)
-    return Response(generate_latest(registry), mimetype=CONTENT_TYPE_LATEST)
 
 ##########################
 # Exception Handling
@@ -159,7 +135,6 @@ def index(device, romtype):
     #pylint: disable=unused-argument
     after = request.args.get("after")
     version = request.args.get("version")
-
     return get_build_types(device, romtype, after, version)
 
 @app.route('/api/v1/types/<string:device>/')
