@@ -7,6 +7,6 @@
     { "model": "nash", "oem": "Motorola", "name": "Z2 Force"},
     { "model": "oneplus3", "oem": "OnePlus", "name": "3 / 3T"},
     { "model": "potter", "oem": "Motorola", "name": "G5 Plus"},
-    { "model": "sailfish", "oem": "Google", "name": "Pixel"}
+    { "model": "sailfish", "oem": "Google", "name": "Pixel"},
     { "model": "vince", "oem": "Xiaomi", "name": "Redmi 5 Plus"}
 ]
